@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: development
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend:/backend
+    tty: true
+    environment:
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+      - DATASOURCE_DRIVER_CLASS_NAME=${DATASOURCE_DRIVER_CLASS_NAME}
+      - DATASOURCE_PLATFORM=${DATASOURCE_PLATFORM}
+      - SPRING_PROFILE_ACTIVE=${SPRING_PROFILE_ACTIVE}
+    command: 'sh gradlew bootRun'
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - ./postgres/init.d:/docker-entrypoint-initdb.d
+      - ./postgres/pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_INITDB_ARGS=${POSTGRES_INITDB_ARGS}
